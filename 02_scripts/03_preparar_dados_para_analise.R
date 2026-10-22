@@ -1,9 +1,10 @@
+# Preparar dados para analises
 
+# limpar ambiente de trabalho
 rm(list = ls())
 
 # carregar pacotes
 library(tidyverse)
-#library(abind)
 
 
 # ler e ajustar dados
@@ -94,15 +95,15 @@ ea_tempo_minimo <- amostragens |>
   filter(n_anos > 2) |>
   mutate(uc_ea = paste(cnuc,ea, sep = "_")) |>
   print()
-# manter amostras que estao em ea_tempo_minimo
+# manter somente amostras que estao no objeto ea_tempo_minimo
 amostragens <- amostragens |>
   filter(paste(cnuc, ea, sep = "_") %in% ea_tempo_minimo$uc_ea) |>
   print()
-# manter somente ucs que permaneceram no objeto amostragens atualizado
+# manter somente ucs que estao no objeto amostragens atualizado acima
 ucs <- ucs |>
   filter(cnuc %in% amostragens$cnuc) |>
   print()
-# manter somente registros de ea que permaneceram no objeto ea_tempo_minimo
+# manter somente registros oriundos de eas que estao no objeto ea_tempo_minimo
 # and in the updated samples object
 registros <- registros |>
   filter(paste(cnuc, ea) %in% paste(amostragens$cnuc, amostragens$ea)) |>
@@ -129,28 +130,6 @@ amostragens |>
   count()
 # sampling is too unequal
 # maybe we should divide terra do meio into "two" different ucs
-
-
-# # keep only ucs with >= 2 eas
-# minimum_eas <- amostragens |>
-#   group_by(uc) |>
-#   summarise(n_eas = n_distinct(ea)) |> 
-#   filter(n_eas > 1) |>
-#   pull(uc) |>
-#   print()
-# 
-# ucs <- ucs |>
-#   filter(uc %in% minimum_eas) |>
-#   print()
-# 
-# amostragens <- amostragens |>
-#   filter(uc %in% minimum_eas) |>
-#   print()
-# 
-# records <- records |>
-#   filter(uc %in% minimum_eas) |>
-#   print()
-
 
 
 # algumas eas tem > 10 dias de amostragem em um unico ano

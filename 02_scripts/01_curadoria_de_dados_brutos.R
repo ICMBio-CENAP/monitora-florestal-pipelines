@@ -1,3 +1,7 @@
+# Baixar e ajustar dados brutos do programa monitora, alvo aves e mamíferos
+
+# limpar ambiente de trabalho
+rm(list = ls())
 
 # carregar pacotes
 library(tidyverse)
@@ -8,7 +12,7 @@ library(taxize)
 
 
 # ler dados brutos
-# dados brutos baixados de
+# dados brutos baixados previamente de
 # https://www.gov.br/icmbio/pt-br/assuntos/monitoramento/conteudo/dados/dados_florestal_monitora/view
 data_file <- fs::dir_ls("01_entrada", regexp = "florestal.xlsx")
 mydata <- read_excel(data_file, sheet = "mastoaves") |>
@@ -52,17 +56,6 @@ mydata <- mydata %>%
     cnuc = sprintf("0000.00.%04d", as.numeric(cnuc))
   ) |>
   print()
-
-# checar potenciais erros em esforco, datas etc
-mydata |>
-  ggplot(aes(x = esforco)) +
-  geom_histogram()
-
-mydata |>
-  ggplot(aes(x = data, y = uc)) +
-  geom_point(shape = "|", size = 3, color = "darkorchid") + # "|" creates a nice dash line
-  theme_minimal() +
-  labs(x = "Tempo", y = "UC")
 
 # checar/simplificar nomes de eas
 mydata |>
@@ -350,103 +343,4 @@ monitora <- list(ucs = ucs,
 
 # salvar para uso posterior
 saveRDS(monitora, "01_entrada/monitora.rds")
-
-
-###########################################################################
-##### trecho abaixo usar somente para validacao de novos conjuntos de dados
-##########################################################################
-#----- Checagem adicional para especies do CENAP
-# usar somente na fase de validacao
-
-#----- Verificação 1:
-# spp vs UC
-# exibir sempre que houver mais de 2 spp do mesmo genero na mesma UC
-# somente especies alvo do CENAP
-mydata_standardized |>
-  filter(ordem %in% c("Artiodactyla", "Carnivora", "Cetartiodactyla",
-                      "Didelphimorphia", "Lagomorpha",
-                      "Perissodactyla", "Rodentia")) |>
-  distinct(uc, genero, genero, especie) |>
-  group_by(uc, genero) |>
-  mutate(nsp = n_distinct(genero, especie)) |>
-  filter(nsp > 1) |>
-  arrange(uc, genero, especie) |>
-  print(n=Inf)
-
-# para verificar:
-# Sciurus NA e Sciurus aestuans em diversas UCs
-# e.g. Flona do Jamari Sciurus NA e Sciurus aestuans
-mydata_standardized |>
-  filter(uc == "Flona do Jamari", genero == "Sciurus") |>
-  group_by(genero, especie) |>
-  count()
-
-
-#----- Verificação 2:
-# quais espécies apareceram pela primeira vez na UC em 2025
-# (pode ser um novo registro, ou um erro)
-
-mydata_standardized |>
-  filter(ordem %in% c("Artiodactyla", "Carnivora", "Cetartiodactyla",
-                      "Didelphimorphia", "Lagomorpha",
-                      "Perissodactyla", "Rodentia")) |>
-  group_by(uc, genero, especie) |>
-  summarize(primeiro_ano = min(ano, na.rm = TRUE), .groups = "drop") |>
-  filter(primeiro_ano == 2025) |>
-  print(n=Inf)
-
-# para verificar
-# Dasyprocta prymnolopha na Esec Jari
-# Dasyproctidae no Cabo Orange
-# Myoprocta no Viruá
-# Dasyprocta fuliginosa na Resex Ituxi
-# Dasyprocta sp. em Verde Para Sempre
-# Dasyprocta leporina no Rio Cajari
-# Myoprocta acouchy no Rio Cajari
-# Dasyproctidae no Rio Cautário
-
-# Esec Jari provavelmente Dasyprocta leporina
-
-mydata |>
-  filter(uc == "Parna do Cabo Orange", familia == "Dasyproctidae") |>
-  group_by(genero, especie) |>
-  count()
-
-mydata |>
-  filter(uc == "Parna do Viruá", familia == "Dasyproctidae") |>
-  group_by(genero, especie, ano) |>
-  count()
-
-mydata |>
-  filter(uc == "Resex Ituxi", familia == "Dasyproctidae") |>
-  group_by(genero, especie) |>
-  count()
-
-# Verde Para Sempre = Dasyprocta iacki
-
-mydata |>
-  filter(uc == "Resex do Rio Cajari", familia == "Dasyproctidae") |>
-  group_by(genero, especie) |>
-  count()
-
-mydata |>
-  filter(uc == "Resex do Rio Cautário", familia == "Dasyproctidae") |>
-  group_by(genero, especie) |>
-  count()
-
-
-#----- Verificação 3:
-# atualizar taxonomias
-# e.g. Subulo gouazoubira, Dicotyles, 
-
-mydata |>
-  filter(grepl("gouazoubira", genero, especie) ) |>
-  distinct(genero, especie) |>
-  print(n=Inf)
-  
-mydata |>
-  filter(grepl("tajacu", genero, especie) ) |>
-  distinct(genero, especie) |>
-  print(n=Inf)
-
 
