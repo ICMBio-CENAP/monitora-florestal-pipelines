@@ -27,7 +27,7 @@ ppost |>
   ggplot(aes(x = p_mean)) +
   geom_histogram(bins = 20, 
                  color = "black", fill = "lightblue",
-                 size = 0.2, alpha = 0.5) +
+                 linewidth = 0.2, alpha = 0.5) +
   theme_bw() +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
@@ -43,7 +43,7 @@ ggsave(plot = last_plot(),
        units = "cm",
        width = 6,
        height = 4,
-       dpi = 300,
+       dpi = 120,
        "03_saida/p_histograma.jpeg")
 
 # sumarios de deteccao
@@ -68,7 +68,7 @@ npost |>
   ggplot(aes(x = mean_n)) +
   geom_histogram(#bins = 30,
                  color = "black", fill = "lightblue",
-                 size = 0.2, alpha = 0.5) +
+                 linewidth = 0.2, alpha = 0.5) +
   #theme_bw() +
   theme_minimal() +
   theme(panel.grid.major = element_blank(),
@@ -425,15 +425,6 @@ tabela_r |>
         axis.title.y = element_text(size = 14, angle = 0, vjust = 0.5)) +
   labs(x = "Abundância inicial", y = expression(alpha[1]))
 
-ggsave(plot = last_plot(),
-       scale = 4,
-       units = "cm",
-       width = 6,
-       height = 4,
-       dpi = 120,
-       "03_saida/r_vs_abundancia_inicial.jpeg")
-
-
 
 # r e categoria de ameaca
 tabela_r |>
@@ -460,7 +451,7 @@ tabela_r |>
   ggplot(aes(x = r_mean, fill = redlist)) +
   geom_histogram(data = background_data, aes(x = r_mean),
                  fill = "grey", alpha = 0.5) +
-  geom_histogram(colour = "black", size = 0.2) +
+  geom_histogram(colour = "black", linewidth = 0.2) +
   guides(fill = FALSE) +
   theme_bw() +
   facet_wrap(~ redlist) +
@@ -478,7 +469,7 @@ tabela_r |>
   ggplot(aes(x = r_mean, fill = classe)) +
   geom_histogram(data = background_data, aes(x = r_mean),
                  fill = "grey", alpha = 0.5) +
-  geom_histogram(colour = "black", size = 0.2) +
+  geom_histogram(colour = "black", linewidth = 0.2) +
   guides(fill = FALSE) +
   theme_bw() +
   facet_wrap(~ classe) +
@@ -496,7 +487,7 @@ tabela_r |>
   ggplot(aes(x = r_mean, fill = categoria_uc)) +
   geom_histogram(data = background_data, aes(x = r_mean),
                  fill = "grey", alpha = 0.5) +
-  geom_histogram(colour = "black", size = 0.2) +
+  geom_histogram(colour = "black", linewidth = 0.2) +
   guides(fill = FALSE) +
   theme_bw() +
   facet_wrap(~ categoria_uc) +

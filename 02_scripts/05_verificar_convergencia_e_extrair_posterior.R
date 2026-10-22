@@ -240,13 +240,11 @@ npost <- npost |>
 # adicionar nome das especies
 npost <- npost |>
   left_join(pop_indexes |>
-              group_by(cnuc) |>
-              mutate(pop = dense_rank(pop_id),
-                     especie = paste(genero, especie, sep = " ")) |>
-              ungroup() |>
+              mutate(especie = paste(genero, especie, sep = " ")) |>
               select(cnuc, pop, especie),
             by = c("cnuc", "pop")) |>
   relocate(especie, .after = uc) |>
+  select(-pop) |>
   print()
 
 # salvar
@@ -285,13 +283,12 @@ ppost <- ppost |>
 # adicionar nome das especies
 ppost <- ppost |>
   left_join(pop_indexes |>
-              group_by(cnuc) |>
-              mutate(pop = dense_rank(pop_id),
-                     especie = paste(genero, especie, sep = " ")) |>
-              ungroup() |>
+              mutate(especie = paste(genero, especie, sep = " ")) |>
               select(cnuc, pop, especie),
             by = c("cnuc", "pop")) |>
   relocate(especie, .after = uc) |>
+  select(-pop) |>
+  
   print()
 
 # salvar
@@ -330,13 +327,11 @@ a1post <- a1post |>
 # adicionar nome das especies
 a1post <- a1post |>
   left_join(pop_indexes |>
-              group_by(cnuc) |>
-              mutate(pop = dense_rank(pop_id),
-                     especie = paste(genero, especie, sep = " ")) |>
-              ungroup() |>
+              mutate(especie = paste(genero, especie, sep = " ")) |>
               select(cnuc, pop, especie),
             by = c("cnuc", "pop")) |>
   relocate(especie, .after = uc) |>
+  select(-pop) |>
   print()
 
 # salvar

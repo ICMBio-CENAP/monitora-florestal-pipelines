@@ -198,8 +198,12 @@ registros |>
   group_by(genero, especie) |>
   summarise(n = n(),
             nucs = n_distinct(cnuc))
-# por ora, vamos ignorar essa questao dos tinamideos
 
+# criar Crypturellus
+registros <- registros |>
+  mutate(especie = case_when(genero == "Crypturellus" ~ "sp",
+                             .default = especie)) |>
+  print()
 
 # aplicar o filtro de 15%
 registros <- registros |>
@@ -312,9 +316,16 @@ uc_indexes <- raw_counts |>
 # criar indices de populacao/especie
 pop_indexes <- raw_counts |>
   left_join(registros |> distinct(genero, especie, pop_id) |> drop_na(especie)) |>
-  distinct(cnuc,pop_id, genero, especie) |>
+  distinct(cnuc,pop_id, pop, genero, especie) |>
   arrange(cnuc,pop_id) |>
   print()
+
+# checar quantas populacoes de cada especie
+pop_indexes |>
+  group_by(genero, especie) |>
+  count() |>
+  arrange(genero, especie) |>
+  print(n=Inf)
 
 
 data_long <- list(y = y,
