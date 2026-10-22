@@ -7,6 +7,9 @@
 *.txt
 *.csv
 *.xlsx
+*.jpg
+*.jpeg
+*.pdf
 github-token.R
 .positai
 rascunho/
