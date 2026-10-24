@@ -94,7 +94,40 @@ dim(res$Rhat$n)
 # # por fazer!
 # logical_array <- res$Rhat$n <= 1.1
 # logical_array
+# substituir nomes de dimensoes no objeto Rhat
+dimnames(res$Rhat$n) <- list(
+  cnuc   = uc_indexes$cnuc,
+  pop  = 1:dim(res$Rhat$n)[2],
+  ea = 1:dim(res$Rhat$n)[3],
+  ano = min(uc_indexes$inicio):max(uc_indexes$fim))
+# converter o array 4D para data frame
+rhat_n_df <- as.data.frame.table(res$Rhat$n, responseName = "Rhat") |>
+  mutate(
+    pa   = as.character(cnuc),
+    pop  = as.integer(pop),
+    site = as.character(ea),
+    year = as.character(ano),
+    Rhat = as.numeric(Rhat)
+  ) |>
+  drop_na(Rhat)
+# sumarizar numero de N que nao convergiram por combinacao de cnuc e pop
+unconverged_summary <- rhat_n_df |>
+  filter(Rhat > 1.1) |>
+  group_by(cnuc, pop) |>
+  summarise(
+    n_unconverged = n(),
+    .groups = "drop") |>
+  arrange(desc(n_unconverged)) |>
+  left_join(uc_indexes |>
+              select(cnuc, uc)) |>
+  left_join(pop_indexes |>
+              select(cnuc, pop, genero, especie),
+            by = c("cnuc", "pop")) |>
+  select(cnuc, uc, genero, especie, pop, n_unconverged) |>
+  print(n=Inf)
 
+# View the resulting tibble
+print(unconverged_summary)
 
 
 #----- mascara para o parametro p

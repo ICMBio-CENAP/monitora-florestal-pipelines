@@ -176,7 +176,8 @@ registros |>
   ggplot(aes(x = percent_reps)) +
   geom_histogram()
 
-# checar quantas populacoes resistem ao criterio
+
+# checar quantas populacoes resistem ao criterio de > 15% das reps
 registros |>
   drop_na(especie) |>
   group_by(cnuc, genero, especie) |>
@@ -205,6 +206,8 @@ registros <- registros |>
                              .default = especie)) |>
   print()
 
+
+
 # aplicar o filtro de 15%
 registros <- registros |>
   drop_na(especie) |>
@@ -219,6 +222,58 @@ registros <- registros |>
   mutate(percent_reps = n_reps/n) |>
   filter(percent_reps >= 0.15) |>
   select(-n_reps, -n, -percent_reps) |>
+  print()
+
+# atualizar especies mantendo somente as que permaneceram em registros apos filtro
+especies <-  especies |>
+  filter(paste(genero, especie) %in% paste(registros$genero, registros$especie)) |>
+  print()
+
+
+# criterio de esforco minimo:
+# manter somente ucs com esforco medio por ea > 5 repeticoes por ano
+amostragens |>
+  group_by(cnuc, ea, ano) |>
+  summarise(n_rep = n_distinct(rep)) |>
+  group_by(cnuc) |>
+  summarise(media_reps = mean(n_rep)) |>
+  arrange(media_reps) |>
+  print() |>
+  ggplot() +
+  geom_histogram(aes(x = media_reps))
+#aparentemente todas atendem a esse criterio 
+
+
+# criterio de numero minimo de anos e eas:
+# manter somente pops registradas em >= 3/4 dos anos e 1/2 das eas
+criterio_anos_e_eas <- registros |>
+  group_by(cnuc) |>
+  mutate(n_eas_uc = n_distinct(ea),
+         n_anos_uc = n_distinct(ano)) |>
+  group_by(cnuc, genero, especie) |>
+  summarise(n_eas_pop = n_distinct(ea),
+            n_anos_pop = n_distinct(ano),
+            percent_eas_pop = n_eas_pop/first(n_eas_uc),
+            percent_anos_pop = n_anos_pop/first(n_anos_uc)) |>
+  arrange(n_anos_pop, n_eas_pop) |>
+  filter(percent_anos_pop >= 3/4,
+         percent_eas_pop >= 1/2) |>
+  select(cnuc, genero, especie) |>
+  print()
+
+# filtrar somente registros de pops que atendem criterio acima
+registros <- registros %>%
+  semi_join(criterio_anos_e_eas, by = c("cnuc", "genero", "especie"))  |>
+  print()
+
+# filtrar amostragens somente de ucs presentes nos registros filtrados
+amostragens <- amostragens %>%
+  filter(cnuc %in% registros$cnuc)  |>
+  print()
+
+# atualizar ucs mantendo somente as que permaneceram apos filtro
+ucs <-  ucs |>
+  filter(cnuc %in% registros$cnuc) |>
   print()
 
 # atualizar especies mantendo somente as que permaneceram em registros apos filtro
@@ -310,7 +365,7 @@ uc_indexes <- raw_counts |>
             fim = max(ano),
             npops = n_distinct(pop_id)) |>
   ungroup() |>
-  data.frame() |>
+  tibble() |>
   print()
 
 # criar indices de populacao/especie
