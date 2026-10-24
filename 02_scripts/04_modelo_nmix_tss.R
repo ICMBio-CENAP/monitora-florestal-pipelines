@@ -175,9 +175,9 @@ inits()
 
 
 # parametros mcmc
-ni <- 7500
-nt <- 25
-nb <- 2500
+ni <- 500000
+nt <- 3000
+nb <- 200000
 nc <- 3
 
 

@@ -1,4 +1,6 @@
 # Explorar os dados do programa Monitora
+# obs: para verificar o significado das colunas, ver dicionario de dados em:
+# https://docs.google.com/spreadsheets/d/1uMWgH0lF--7ZRHhXMReOhqdtvQ8pSDXpDRabuZBJNs0/edit?usp=sharing
 
 # limpar ambiente de trabalho
 rm(list = ls())
