@@ -182,17 +182,15 @@ nc <- 3
 
 
 # chamar o jags
-mod <- jagsUI::jags(data=jags_data,
-                    inits=inits,
-                    #inits=NULL,
-                    parameters.to.save=params,
-                    model.file="02_scripts/tss.jags",
-                    n.chains=nc,
-                    n.thin=nt,
-                    n.iter=ni,
-                    n.burnin=nb,
-                    parallel = TRUE
-)
+system.time(mod <- jagsUI::jags(data = jags_data,
+                                inits = inits,
+                                parameters.to.save = params,
+                                model.file = "02_scripts/tss.jags",
+                                n.chains = nc,
+                                n.thin = nt,
+                                n.iter = ni,
+                                n.burnin = nb,
+                                parallel = TRUE))
 
 # salvar
 saveRDS(mod, "03_saida/res_tss_multiregion.rds")
