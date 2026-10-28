@@ -126,6 +126,7 @@ npost |>
   geom_smooth(method = "loess", se = FALSE,
               color = "black", linewidth = 0.4) +
   theme_bw() +
+  ylim(-0.7, NA) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
   labs(x = "", y = "Abundância relativa (padronizada)")
