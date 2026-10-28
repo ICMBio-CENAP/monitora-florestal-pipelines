@@ -28,10 +28,10 @@ especies
 # quantas ucs, categorias, biomas
 nrow(ucs)
 ucs |>
-  group_by(sigla) |>
+  group_by(categoria) |>
   count()
 ucs |>
-  group_by(categoria) |>
+  group_by(sigla) |>
   count()
 ucs |>
   group_by(bioma) |>
@@ -40,16 +40,47 @@ ucs |>
 
 #----- amostragens
 
+# evolucao do programa ao longo do tempo
 amostragens |>
-  ggplot(aes(x = data, y = cnuc)) +
-  geom_point(shape = "|", size = 3, color = "darkorchid") +
+  summarise(.by = c(cnuc, ano),
+            n = n(),
+            first_year = first(ano)) |>
+  mutate(cnuc = fct_reorder(as.factor(cnuc), first_year, .fun = first)) |> 
+  ggplot(aes(x = ano, y = cnuc, fill = n)) +
+  geom_tile(size = 1, show.legend = FALSE) +
+  scale_fill_gradient(low = "white", high = "darkblue") +
+  #theme_classic() +
   theme_minimal() +
   labs(x = "", y = "UC")
 
-# esforco
+# anos de amostragem por uc
+amostragens |>
+  summarise(.by = c(cnuc),
+            n_anos = n_distinct(ano)) |>
+  ggplot() +
+  geom_histogram(aes(x = n_anos),
+                 bins = 6,
+                 colour = "black", fill = "steelblue",
+                 linewidth = 0.2, alpha = 0.5) +
+  theme_minimal() +
+  labs(x = "Número de anos")
+
+# distribuicao do esforco acumulado por uc
+amostragens |>
+  summarise(.by = cnuc,
+            esforco_total = sum(esforco)) |>
+  ggplot(aes(x = esforco_total)) +
+  geom_histogram(colour = "black", fill = "steelblue",
+                 linewidth = 0.2, alpha = 0.5) +
+  theme_minimal() +
+  labs(x = "Esforço acumulado (km)")
+
+
+# distribuicao do esforco por amostragem individual
 amostragens |>
   ggplot(aes(x = esforco)) +
-  geom_histogram() +
+  geom_histogram(colour = "black", fill = "steelblue",
+                 linewidth = 0.2, alpha = 0.5) +
   theme_minimal() +
   labs(x = "Esforço (km)")
 
@@ -162,4 +193,19 @@ registros |>
   labs(x = "Percentagem das amostragens")
 
 
-
+# checar serra do cipo
+# obter cnuc
+ucs |>
+  filter(grepl('cipo', uc))
+amostragens |>
+  filter(cnuc == "0000.00.0148") |>
+  print()
+amostragens |>
+  filter(cnuc == "0000.00.0148") |>
+  summarise(n_ano = n_distinct(ano),
+            n_eas = n_distinct(ea),
+            n_amostras = n()) |>
+  print()
+registros |>
+  filter(cnuc == "0000.00.0148") |>
+  print()

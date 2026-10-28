@@ -195,4 +195,7 @@ system.time(mod <- jagsUI::jags(data = jags_data,
 # salvar
 saveRDS(mod, "03_saida/res_tss_multiregion.rds")
 
-
+# elapsed/3600
+106763.151/3600
+# model fitting took 29.6 hours
+# using fedora linux in asus vivobook intel core i5

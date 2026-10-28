@@ -7,7 +7,6 @@
 rm(list = ls())
 
 # carregar pacotes
-library(here)
 library(tidyverse)
 library(jagsUI)
 
@@ -113,7 +112,7 @@ rhat_n_df <- as.data.frame.table(res$Rhat$n, responseName = "Rhat") |>
 # sumarizar numero de N que nao convergiram por combinacao de cnuc e pop
 unconverged_summary <- rhat_n_df |>
   filter(Rhat > 1.1) |>
-  group_by(cnuc, pop) |>
+  group_by(cnuc, pop, year) |>
   summarise(
     n_unconverged = n(),
     .groups = "drop") |>
@@ -123,7 +122,7 @@ unconverged_summary <- rhat_n_df |>
   left_join(pop_indexes |>
               select(cnuc, pop, genero, especie),
             by = c("cnuc", "pop")) |>
-  select(cnuc, uc, genero, especie, pop, n_unconverged) |>
+  select(cnuc, uc, genero, especie, pop, year, n_unconverged) |>
   print(n=Inf)
 
 # View the resulting tibble

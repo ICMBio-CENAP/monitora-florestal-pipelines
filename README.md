@@ -9,6 +9,8 @@ Em seguida, os dados de populações selecionadas são inseridos em um modelo po
 Estas estimativas populacionais podem ser usadas na produção de índices agregados de tendências de biodiversidade, como o Living Planet Index - LPI, e outros.
 
 
+<img src="03_saida/all_trends.jpeg" title="Relative abundance trends" width="700">
+
 ## Estrutura do diretório
 
 ``` bash

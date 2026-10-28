@@ -4,10 +4,9 @@
 rm(list = ls())
 
 # carregar pacotes
-library(here)
 library(tidyverse)
-library(gridExtra)
-library(janitor)
+#library(gridExtra)
+#library(janitor)
 
 
 # ler dados ---------------------------------------------------
@@ -112,6 +111,34 @@ npost |>
 #   print()
 
 
+# grafico tendencias todas as pops
+npost |>
+  mutate(grp = dense_rank(paste(uc, especie))) |>
+  summarise(.by = c(grp, ano),
+            n_mean = mean (n)) |>
+  arrange(ano) |>
+  group_by(grp) |>
+  mutate(n_std = n_mean/first(n_mean)) |>
+  ggplot(aes(x = ano, y = n_std)) +
+  geom_smooth(aes(group = grp),
+              se=FALSE,
+              color = "gray80", linewidth = 0.1, alpha = 0.1) +
+  geom_smooth(method = "loess", se = FALSE,
+              color = "black", linewidth = 0.4) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  labs(x = "", y = "Abundância relativa (padronizada)")
+
+
+# salvar figura
+ggsave(plot = last_plot(),
+       scale = 3,
+       units = "cm",
+       width = 6,
+       height = 4,
+       dpi = 120,
+       "03_saida/all_trends.jpeg")
 
 # grafico tendencias por uc media + barras de erros
 npost |>
@@ -122,7 +149,7 @@ npost |>
             upper = quantile(n, prob = 0.9, na.rm=TRUE)) |>
   ungroup() |>
   ggplot(aes(x = ano, y = mean)) +
-  geom_line(aes(x = ano, y = mean), size = 0.3, alpha = 0.8) +
+  geom_line(aes(x = ano, y = mean), linewidth = 0.3, alpha = 0.8) +
   geom_point(aes(x = ano, y = mean),  shape = 21,
              color = "white", stroke = 2,
              fill = "black", size = 2) +
@@ -162,7 +189,7 @@ npost |>
   ungroup() |>
   ggplot(aes(x = ano, y = mean)) +
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = "lightblue", alpha = 0.9) +
-  geom_line(aes(x = ano, y = mean), size = 0.2, alpha = 0.5) +
+  geom_line(aes(x = ano, y = mean), linewidth = 0.2, alpha = 0.5) +
   geom_point(aes(x = ano, y = mean),  shape = 21,
              color = "lightblue", stroke = 3,
              fill = "black", size = 1.5) +
@@ -440,7 +467,7 @@ tabela_r |>
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank()) +
   labs(x = "Grau de ameaça", y = "Tendência") +
-  guides(fill = guide_legend(title = "Categoria"))
+  guides(fill = guide_legend(title = "Categoria"), scale = "none")
 
 
 # r e categoria de ameaca histogram splitted
@@ -470,7 +497,7 @@ tabela_r |>
   geom_histogram(data = background_data, aes(x = r_mean),
                  fill = "grey", alpha = 0.5) +
   geom_histogram(colour = "black", linewidth = 0.2) +
-  guides(fill = FALSE) +
+  guides(fill = FALSE, scale = "none") +
   theme_bw() +
   facet_wrap(~ classe) +
   theme(strip.text = element_text(size = 14)) +
@@ -488,7 +515,7 @@ tabela_r |>
   geom_histogram(data = background_data, aes(x = r_mean),
                  fill = "grey", alpha = 0.5) +
   geom_histogram(colour = "black", linewidth = 0.2) +
-  guides(fill = FALSE) +
+  guides(fill = FALSE, scale = "none") +
   theme_bw() +
   facet_wrap(~ categoria_uc) +
   theme(strip.text = element_text(size = 14)) +
