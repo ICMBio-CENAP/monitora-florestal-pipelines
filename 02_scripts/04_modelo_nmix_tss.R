@@ -13,20 +13,20 @@ library(jagsUI)
 
 
 # carregar dados previamente preparados
-data_wide <- readRDS("01_entrada/data_long.rds")
+data_long <- readRDS("01_entrada/data_long.rds")
 
 
 # juntar dados para entrada no jags
-jags_data <- list(y = data_wide$y,
-                  pa = dense_rank(data_wide$uc),
-                  pop = data_wide$pop,
-                  site = data_wide$ea,
-                  year = data_wide$ano-2013,
-                  nobs = data_wide$nobs,
-                  npa = data_wide$nuc,
-                  npop = data_wide$npop,
-                  nsite = data_wide$nea,
-                  nyear = data_wide$nano
+jags_data <- list(y = data_long$y,
+                  pa = dense_rank(data_long$uc),
+                  pop = data_long$pop,
+                  site = data_long$ea,
+                  year = data_long$ano-2013,
+                  nobs = data_long$nobs,
+                  npa = data_long$nuc,
+                  npop = data_long$npop,
+                  nsite = data_long$nea,
+                  nyear = data_long$nano
                   )
 str(jags_data)
 
@@ -105,7 +105,13 @@ for (pa in 1:npa) {
         log(lambda[pa,pop,year]) <- a0[pa,pop] + a1[pa,pop]*(year[year]-1) # minus 1 to set 1st to zero
         
         for(site in 1:nsite){
-          n[pa,pop,site,year] ~ dpois(lambda[pa,pop,year])
+          #n[pa,pop,site,year] ~ dpois(lambda[pa,pop,year])
+          # with truncation setting maximum value = K = 5X the max count
+          # this finite upper limit is needed to improve mixing of the chains
+          # and also is due to the infinite support of the Poisson prior
+          # and also restricts N to biologically realistic values
+          # see for ex. pg 78 of AHME book (likelihood example)
+          n[pa,pop,site,year] ~ dpois(lambda[pa, pop, year])T(0,K[pa,pop])
         }#site
 
    }#year
@@ -145,11 +151,11 @@ params <- c('lambda', 'n',  'p', 'a0', 'a1')
 
 # inicializar abundancia n usando a maior contagem observada em cada ea (site)
 # n[pa,pop,site,year] # dimensoes do objeto n)
-y_max <- tibble(pa = data_wide$uc,
-                pop = data_wide$pop,
-                site = data_wide$ea,
-                year = data_wide$ano,
-                y = data_wide$y) |>
+y_max <- tibble(pa = data_long$uc,
+                pop = data_long$pop,
+                site = data_long$ea,
+                year = data_long$ano,
+                y = data_long$y) |>
   group_by(pa, pop, site, year) |>
   summarise(y = max(y)) |>
   ungroup() |>
@@ -158,6 +164,7 @@ y_max <- tibble(pa = data_wide$uc,
            fill = list(y = 0)) |>
   arrange(pa,pop,site,year) |>
   print()
+
 
 # transformar em array com dimensoes [pa,pop,site,year]
 # usar funcao xtabs, que cria tabelas de contingencia ou matrizes esparsas usando formulas
@@ -169,17 +176,26 @@ y_array[1,2,,] # tdm, pop 2
 y_array[36,1,,] # cazumba, pop 1
 y_array[36,2,,] # cazumba, pop 2
 
-
 inits <- function() list(n = y_array)
 inits()
 
+# get maximum count from y_array to set upper bound for n
+# i.e., n will be truncated to 10X the max count for a given pop
+K <- apply(y_array, c(1,2), max)*10
+dimnames(K) <- NULL
+head(K)
+# include K in jags_data
+jags_data <- c(jags_data, list(K = K))
+
 
 # parametros mcmc
-ni <- 500000
-nt <- 3000
-nb <- 200000
+ni <- 250000
+nt <- 1500
+nb <- 100000
 nc <- 3
 
+# check predicted size of posterior
+#((ni-nb)*3)/nt
 
 # chamar o jags
 system.time(mod <- jagsUI::jags(data = jags_data,

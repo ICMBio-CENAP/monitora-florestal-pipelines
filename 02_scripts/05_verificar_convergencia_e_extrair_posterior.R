@@ -88,7 +88,7 @@ abline(v = 1.1, lty = "dashed", lwd = 2, col = "red")
 # quais nao convergiram
 dim(res$Rhat$n)
 
-# remover da posterior as populacoes com qualque n que nao convergiu
+# remover da posterior as populacoes com qualquer n que nao convergiu
 # isto, e, se nao convergiu em um ano, remover a populacao por completo
 # # por fazer!
 # logical_array <- res$Rhat$n <= 1.1
@@ -112,7 +112,7 @@ rhat_n_df <- as.data.frame.table(res$Rhat$n, responseName = "Rhat") |>
 # sumarizar numero de N que nao convergiram por combinacao de cnuc e pop
 unconverged_summary <- rhat_n_df |>
   filter(Rhat > 1.1) |>
-  group_by(cnuc, pop, year) |>
+  group_by(cnuc, pop, ea, year) |>
   summarise(
     n_unconverged = n(),
     .groups = "drop") |>
@@ -122,12 +122,11 @@ unconverged_summary <- rhat_n_df |>
   left_join(pop_indexes |>
               select(cnuc, pop, genero, especie),
             by = c("cnuc", "pop")) |>
-  select(cnuc, uc, genero, especie, pop, year, n_unconverged) |>
+  select(cnuc, uc, ea, genero, especie, pop, year, n_unconverged) |>
   print(n=Inf)
 
-# View the resulting tibble
-print(unconverged_summary)
-
+# salvar para uso posterior
+write_csv(unconverged_summary, "03_saida/unconverged_summary.csv")
 
 #----- mascara para o parametro p
 

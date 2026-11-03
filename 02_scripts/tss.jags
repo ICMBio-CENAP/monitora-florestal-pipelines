@@ -70,7 +70,13 @@ for (pa in 1:npa) {
         log(lambda[pa,pop,year]) <- a0[pa,pop] + a1[pa,pop]*(year[year]-1) # minus 1 to set 1st to zero
         
         for(site in 1:nsite){
-          n[pa,pop,site,year] ~ dpois(lambda[pa,pop,year])
+          #n[pa,pop,site,year] ~ dpois(lambda[pa,pop,year])
+          # with truncation setting maximum value = K = 5X the max count
+          # this finite upper limit is needed to improve mixing of the chains
+          # and also is due to the infinite support of the Poisson prior
+          # and also restricts N to biologically realistic values
+          # see for ex. pg 78 of AHME book (likelihood example)
+          n[pa,pop,site,year] ~ dpois(lambda[pa, pop, year])T(0,K[pa,pop])
         }#site
 
    }#year

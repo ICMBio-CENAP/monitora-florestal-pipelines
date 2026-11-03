@@ -245,7 +245,7 @@ amostragens |>
 
 
 # criterio de numero minimo de anos e eas:
-# manter somente pops registradas em >= 3/4 dos anos e 1/2 das eas
+# manter somente pops registradas em >= 3/4 dos anos e 3/4 das eas
 criterio_anos_e_eas <- registros |>
   group_by(cnuc) |>
   mutate(n_eas_uc = n_distinct(ea),
@@ -257,7 +257,7 @@ criterio_anos_e_eas <- registros |>
             percent_anos_pop = n_anos_pop/first(n_anos_uc)) |>
   arrange(n_anos_pop, n_eas_pop) |>
   filter(percent_anos_pop >= 3/4,
-         percent_eas_pop >= 1/2) |>
+         percent_eas_pop >= 3/4) |>
   select(cnuc, genero, especie) |>
   print()
 
@@ -295,7 +295,6 @@ registros <- registros |>
   #mutate(pop_number = as.numeric(pop_number)) |>
   ungroup() |>
   print()
-  
 
 
 #----- criar objeto y que sera input para modelo N-mixture
